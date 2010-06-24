@@ -87,6 +87,16 @@ If there is no need in command digest you can create standalone command by overr
             cmd=StandAloneCommand()
         ), argv)
 
-Now you are ready to use commands
+And after that
 
     % python manage.py cmd arg arg2 --kwarg=val
+
+
+On command parametrs
+--------------------
+
+Main purpose was to create flexible commands easy way. So, for parametrs we use native python function parametrs declaration, where you can have args, keyword args with it's defaults values. On command line all arguments after command name will become args. Arguments in form of '--arg=value' will become kwargs. Arguments in form of '--arg' will become kwarg with value 'True' (very useful sometimes). So this call means:
+
+    % python manage.py digest:command_name arg --kwargs=val --kwargs2
+
+    command_instance.command_command_name('arg', kwarg='val', kwarg2=True)
