@@ -3,3 +3,90 @@ MAGE
 ====
 
 Easy commands set creation
+
+Doc
+===
+
+`mage` allows you to create standalone commands and commands digests. After that you may use that commands easy:
+
+    % python manage.py command_name arg --kwarg=val --kwarg2
+
+or if you defined the command digest:
+
+    % python manage.py digest:command_name arg --kwarg=val --kwarg2
+
+Defining commands digest
+------------------------
+
+Subclass `mage.CommandDigest` class and append methods with prefix `command_`. For example I want to create useful command digest for sqlalchemy:
+
+    class SqlaCommands(CommandDigest):
+        '''
+        This commands allow you to sync/drop/init tables in database
+        '''
+
+        def __init__(self, models, init_function=None):
+            self.models = models
+            self.init_function = init_function
+
+        def command_sync(self, db_name='default'):
+            # implementation
+            pass
+
+        def command_drop(self, db_name='default'):
+            # implementation
+            pass
+
+        def command_init(self, db_name='default'):
+            self.command_drop(db_name=db_name)
+            self.command_sync(db_name=db_name)
+            # construct session object
+            if self.init_function:
+                self.init_function(session)
+
+Note: You can provide your own `__init__`.
+Note: Class docstring and methods docstring becomes help message.
+
+After that just create module with any name, which actualy will be mage :)
+
+    # ./manage.py
+    from models import models_list, initial
+
+    if __name__ == '__main__':
+        from sys import argv
+        from mage import manage
+        manage(dict(
+            sqla=SqlaCommands(models_list, initial)
+        ), argv)
+
+Now you are ready to use commands
+
+    % python manage.py sqla:sync
+    % python manage.py sqla:sync admin_base
+    % python manage.py sqla:drop front_base
+    % python manage.py sqla:init front_base
+
+Defining standalone command
+---------------------------
+
+If there is no need in command digest you can create standalone command by overriding method `default`:
+
+    class StandAloneCommand(CommandDigest):
+        '''
+        Command doc
+        '''
+        def default(self, *args, **kwargs):
+            #implementation
+            pass
+
+    # ./manage.py
+    if __name__ == '__main__':
+        from sys import argv
+        from mage import manage
+        manage(dict(
+            cmd=StandAloneCommand()
+        ), argv)
+
+Now you are ready to use commands
+
+    % python manage.py cmd arg arg2 --kwarg=val
