@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import datetime
 
 
 __all__ = ['manage', 'CommandDigest']
 
 
 class CommandNotFound(AttributeError): pass
+class ConverterError(Exception): pass
 
 
 def manage(commands, argv):
@@ -93,11 +95,66 @@ class CommandDigest(object):
                 if k.startswith('command_'):
                     sys.stdout.write(k.__doc__)
         elif hasattr(self, 'command_'+command_name):
-            getattr(self, 'command_'+command_name)(*args, **kwargs)
+            try:
+                getattr(self, 'command_'+command_name)(*args, **kwargs)
+            except ConverterError, e:
+                sys.stderr.write('One of the arguments for '
+                                 'command "%s" is wrong:\n' % command_name)
+                sys.stderr.write(str(e))
         else:
             if self.__class__.__doc__:
                 sys.stdout.write(self.__class__.__doc__)
             raise CommandNotFound()
+
+
+class argconv(object):
+
+    def __init__(self, arg_id, *validators, **kwargs):
+        self.arg_id = arg_id
+        self.validators = validators
+        self.required = kwargs.get('required', True)
+
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            args = list(args)
+            if isinstance(self.arg_id, int):
+                arg = args[self.arg_id]
+                arg = self.convert(arg)
+                args[self.arg_id] = arg
+            elif isinstance(self.arg_id, str):
+                arg = kwargs.get(self.arg_id)
+                if arg:
+                    arg = self.convert(arg)
+                    kwargs[self.arg_id] = arg
+                if not arg and self.required:
+                    raise ConverterError('Argument "%s" is required' % self.arg_id)
+            else:
+                #XXX: may be check this in init?
+                raise ConverterError('First argument of argconv decorator '
+                                'must be "str" or "int" type')
+            return func(*args, **kwargs)
+        return wrapper
+
+    def convert(self, arg):
+        for v in self.validators:
+            arg = v(arg)
+        return arg
+
+    @staticmethod
+    def to_int(value):
+        try:
+            return int(value)
+        except Exception:
+            raise ConverterError('Cannot convert %r to int' % value)
+
+    @staticmethod
+    def to_date(value):
+        try:
+            return datetime.datetime.strptime(value, '%d/%m/%Y').date()
+        except Exception:
+            raise ConverterError('Cannot convert %r to date, please provide '
+                                 'string in format "dd/mm/yyyy"' % value)
+
 
 
 #--------- TESTS ------------
@@ -123,6 +180,18 @@ class CommandDigestTest(unittest.TestCase):
         argv = 'mage.py test:test arg1 --kwarg=kwarg3'
         manage(dict(test=test_cmd), argv.split())
 
+    def test_convs(self):
+        assrt = self.assertEquals
+        class TestCommand(CommandDigest):
+            @argconv(1, argconv.to_int)
+            @argconv('kwarg', argconv.to_date)
+            def command_test(self, arg, kwarg=None, kwarg2=False):
+                assrt(arg, 1)
+                assrt(kwarg, datetime.date(2010, 6, 9))
+                assrt(kwarg2, True)
+        test_cmd = TestCommand()
+        argv = 'mage.py test:test 1 --kwarg=9/6/2010 --kwarg2'
+        manage(dict(test=test_cmd), argv.split())
 
 
 if __name__ == '__main__':
