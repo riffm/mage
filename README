@@ -72,27 +72,24 @@ Now you are ready to use commands
 Defining standalone command
 ---------------------------
 
-If there is no need in command digest you can create standalone command by overriding method `default`:
+If there is no need in command digest you can create standalone command by callable:
 
-    class StandAloneCommand(CommandDigest):
-        '''
-        Command doc
-        '''
-        def default(self, *args, **kwargs):
-            #implementation
-            pass
+    def cmd(arg, kwarg=None, kwarg2=False):
+        assert(arg == '1')
+        assert(kwarg == 'val')
+        assert(kwarg2 == True)
 
     # ./manage.py
     if __name__ == '__main__':
         from sys import argv
         from mage import manage
         manage(dict(
-            cmd=StandAloneCommand()
+            cmd=cmd,
         ), argv)
 
 And after that
 
-    % python manage.py cmd arg arg2 --kwarg=val
+    % python manage.py cmd arg --kwarg=val --kwarg2
 
 
 On command parametrs
@@ -108,7 +105,7 @@ Main purpose was to create flexible commands easy way. So, for parametrs we use 
 Arguments converters
 --------------------
 
-`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str). All other positional parametrs are - functions that can convert or validate values.
+`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values.
 
     class TestCommand(CommandDigest):
 

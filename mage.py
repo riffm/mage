@@ -60,7 +60,10 @@ def manage(commands, argv, delim=':'):
                 sys.stdout.write('\n')
             sys.exit('Command "%s" not found' % digest_name)
         try:
-            digest(command, *args, **kwargs)
+            if command is None:
+                digest(*args, **kwargs)
+            else:
+                digest(command, *args, **kwargs)
         except CommandNotFound:
             sys.stdout.write(commands[digest_name].description())
             sys.exit('Command "%s:%s" not found' % (digest_name, command))
@@ -70,10 +73,6 @@ def manage(commands, argv, delim=':'):
 
 class CommandDigest(object):
     ''
-
-    def default(self, *args, **kwargs):
-        '''This method will be called if command_name in __call__ is None'''
-        sys.stdout.write(self.description())
 
     def description(self):
         '''Description outputed to console'''
@@ -87,9 +86,7 @@ class CommandDigest(object):
         return _help
 
     def __call__(self, command_name, *args, **kwargs):
-        if command_name is None:
-            self.default(*args, **kwargs)
-        elif command_name == 'help':
+        if command_name == 'help':
             sys.stdout.write(self.__doc__)
             for k in self.__dict__.keys():
                 if k.startswith('command_'):
@@ -118,7 +115,12 @@ class argconv(object):
         def wrapper(*args, **kwargs):
             args = list(args)
             if isinstance(self.arg_id, int):
-                arg = args[self.arg_id]
+                try:
+                    arg = args[self.arg_id]
+                except IndexError:
+                    raise ConverterError('Total positional args = %d, '
+                        'but you apply converter for %d argument '
+                        '(indexing starts from 0)' % (len(args), self.arg_id))
                 arg = self.convert(arg)
                 args[self.arg_id] = arg
             elif isinstance(self.arg_id, str):
@@ -170,15 +172,27 @@ class CommandDigestTest(unittest.TestCase):
                 assrt(arg, 'arg1')
                 assrt(kwarg, 'kwarg3')
                 assrt(kwarg2, False)
-            def default(self, arg, kwarg=None, kwarg2=False):
-                assrt(arg, 'arg')
-                assrt(kwarg, 'kwarg')
-                assrt(kwarg2, True)
         test_cmd = TestCommand()
-        argv = 'mage.py test arg --kwarg=kwarg --kwarg2'
-        manage(dict(test=test_cmd), argv.split())
         argv = 'mage.py test:test arg1 --kwarg=kwarg3'
         manage(dict(test=test_cmd), argv.split())
+
+    def test_function_as_command(self):
+        def cmd(arg, kwarg=None, kwarg2=False):
+            self.assertEquals(arg, 'arg')
+            self.assertEquals(kwarg, 'kwarg')
+            self.assertEquals(kwarg2, True)
+        argv = 'mage.py test arg --kwarg=kwarg --kwarg2'
+        manage(dict(test=cmd), argv.split())
+
+    def test_function_with_convs_as_command(self):
+        @argconv(0, argconv.to_int)
+        @argconv('kwarg', argconv.to_date)
+        def cmd(arg, kwarg=None, kwarg2=False):
+            self.assertEquals(arg, 1)
+            self.assertEquals(kwarg, datetime.date(2010, 6, 9))
+            self.assertEquals(kwarg2, True)
+        argv = 'mage.py test 1 --kwarg=9/6/2010 --kwarg2'
+        manage(dict(test=cmd), argv.split())
 
     def test_convs(self):
         assrt = self.assertEquals
