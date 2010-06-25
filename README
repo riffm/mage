@@ -62,6 +62,7 @@ After that just create module with any name, which actualy will be mage :)
             sqla=SqlaCommands(models_list, initial)
         ), argv)
 
+Note: You use another delimeter instead of ':', just provide kw argement to `manage` function. `manage(commands, argv, delim='.')`
 Now you are ready to use commands
 
     % python manage.py sqla:sync

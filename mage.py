@@ -11,7 +11,7 @@ class CommandNotFound(AttributeError): pass
 class ConverterError(Exception): pass
 
 
-def manage(commands, argv):
+def manage(commands, argv, delim=':'):
     '''
     Parses argv and runs neccessary command. Is to be used in manage.py file.
 
@@ -46,8 +46,8 @@ def manage(commands, argv):
                 args.append(item)
 
         # trying to get command instance
-        if ':' in cmd_name:
-            digest_name, command = cmd_name.split(':')
+        if delim in cmd_name:
+            digest_name, command = cmd_name.split(delim)
         else:
             digest_name = cmd_name
             command = None
