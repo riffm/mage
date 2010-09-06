@@ -6,6 +6,7 @@ setup(
     name="mage",
     version="0.3",
     py_modules=["mage"],
+    scripts=["mage"],
     author="Tim Perevezentsev",
     author_email="riffm2005@gmail.com",
     description="A set of insanities of several geeks to show ourselves our coolness.",

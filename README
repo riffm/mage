@@ -105,7 +105,7 @@ Main purpose was to create flexible commands easy way. So, for parametrs we use 
 Arguments converters
 --------------------
 
-`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values.
+`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values:
 
     class TestCommand(CommandDigest):
 
@@ -115,3 +115,15 @@ Arguments converters
             assert(arg == 1)
             assert(kwarg == datetime.date(2010, 6, 9))
             assert(kwarg2 == True)
+
+    % python manage.py cmd:test 1 --kwarg=9/6/2010 --kwarg2
+
+
+mage script
+-----------
+
+If you install `mage` standard way (i.e. distutils, setooptools, pip, distribute) you have script installed in your system's bin directory called `mage`. This script allows to call commands from modules inplace. For example we have package `insanities` (in PYTHON_PATH) with module `cmd` with `mage.CommandDigest` based commands in it and we want to call command `project`:
+
+    % mage insanities.cmd:project name_of_project
+
+`mage` script will look for `project` command in `insanities.cmd` and if it will find it `project` will be called with parameters given to `mage` script.

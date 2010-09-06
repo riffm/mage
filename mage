@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+import sys
+import os
+import mage
+
+USAGE = 'Usage: mage module_name:command_digest_name[:command_name] *[arg] *[--kwarg=value]'
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        sys.exit(USAGE)
+    name = sys.argv[1]
+    if not ':' in name:
+        sys.exit(USAGE)
+    module_name, full_cmd_name = name.split(':', 1)
+    cmd_name = full_cmd_name if ':' not in full_cmd_name else full_cmd_name.split(':', 1)[0]
+    module = __import__(module_name, globals(), locals(), [module_name.split('.')[-1]], -1)
+    cmd = getattr(module, cmd_name)
+    compound_cmd_text = 'mage.py %s %s' % (full_cmd_name, ' '.join(sys.argv[2:]))
+    mage.manage({cmd.__name__:cmd()}, compound_cmd_text.split())
