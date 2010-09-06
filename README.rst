@@ -7,11 +7,11 @@ Easy commands set creation
 Doc
 ===
 
-`mage` allows you to create standalone commands and commands digests. After that you may use that commands easy:
+`mage` allows you to create standalone commands and commands digests. After that you may use that commands easy::
 
     % python manage.py command_name arg --kwarg=val --kwarg2
 
-or if you defined the command digest:
+or if you defined the command digest::
 
     % python manage.py digest:command_name arg --kwarg=val --kwarg2
 
