@@ -7,7 +7,7 @@ Easy commands set creation
 Doc
 ===
 
-`mage` allows you to create standalone commands and commands digests. After that you may use that commands easy::
+``mage`` allows you to create standalone commands and commands digests. After that you may use that commands easy::
 
     % python manage.py command_name arg --kwarg=val --kwarg2
 
@@ -18,7 +18,7 @@ or if you defined the command digest::
 Defining commands digest
 ------------------------
 
-Subclass `mage.CommandDigest` class and append methods with prefix `command_`. For example I want to create useful command digest for sqlalchemy::
+Subclass ``mage.CommandDigest`` class and append methods with prefix ``command_``. For example I want to create useful command digest for sqlalchemy::
 
     class SqlaCommands(CommandDigest):
         '''
@@ -47,7 +47,7 @@ Subclass `mage.CommandDigest` class and append methods with prefix `command_`. F
             self.command_sync(db_name=db_name)
             self.command_init(db_name=db_name)
 
-Note: You can provide your own `__init__`.
+Note: You can provide your own ``__init__``.
 Note: Class docstring and methods docstring becomes help message.
 
 After that just create module with any name, which actualy will be mage :)::
@@ -62,7 +62,7 @@ After that just create module with any name, which actualy will be mage :)::
             sqla=SqlaCommands(models_list, initial)
         ), argv)
 
-Note: You use another delimeter instead of ':', just provide kw argement to `manage` function. `manage(commands, argv, delim='.')`
+Note: You use another delimeter instead of ':', just provide kw argement to ``manage`` function. ``manage(commands, argv, delim='.')``
 Now you are ready to use commands::
 
     % python manage.py sqla:sync
@@ -105,7 +105,7 @@ Main purpose was to create flexible commands easy way. So, for parametrs we use 
 Arguments converters
 --------------------
 
-`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values::
+``mage`` has smart decorator called ``argconv``. It helps to convert arguments to python types. First parametr of ``argconv`` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values::
 
     class TestCommand(CommandDigest):
 
@@ -122,8 +122,8 @@ Arguments converters
 mage script
 -----------
 
-If you install `mage` standard way (i.e. distutils, setooptools, pip, distribute) you have script installed in your system's bin directory called `mage`. This script allows to call commands from modules inplace. For example we have package `insanities` (in PYTHON_PATH) with module `cmd` with `mage.CommandDigest` based commands in it and we want to call command `project`::
+If you install ``mage`` standard way (i.e. distutils, setooptools, pip, distribute) you have script installed in your system's bin directory called ``mage``. This script allows to call commands from modules inplace. For example we have package ``insanities`` (in PYTHON_PATH) with module ``cmd`` with ``mage.CommandDigest`` based commands in it and we want to call command ``project``::
 
     % mage insanities.cmd:project name_of_project
 
-`mage` script will look for `project` command in `insanities.cmd` and if it will find it `project` will be called with parameters given to `mage` script.
+``mage`` script will look for ``project`` command in ``insanities.cmd`` and if it will find it ``project`` will be called with parameters given to ``mage`` script.
