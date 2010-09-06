@@ -105,8 +105,11 @@ class CommandDigest(object):
 
 
 class argconv(object):
+    'Decorator. Helps to define desired argument types'
 
     def __init__(self, arg_id, *validators, **kwargs):
+        assert type(arg_id) in (int, str), \
+            'First argument of argconv (%r) decorator must be "str" or "int" type' % arg_id
         self.arg_id = arg_id
         self.validators = validators
         self.required = kwargs.get('required', True)
@@ -129,11 +132,7 @@ class argconv(object):
                     arg = self.convert(arg)
                     kwargs[self.arg_id] = arg
                 if not arg and self.required:
-                    raise ConverterError('Argument "%s" is required' % self.arg_id)
-            else:
-                #XXX: may be check this in init?
-                raise ConverterError('First argument of argconv decorator '
-                                'must be "str" or "int" type')
+                    raise ConverterError('Keyword argument "%s" is required' % self.arg_id)
             return func(*args, **kwargs)
         return wrapper
 
@@ -206,6 +205,16 @@ class CommandDigestTest(unittest.TestCase):
         test_cmd = TestCommand()
         argv = 'mage.py test:test 1 --kwarg=9/6/2010 --kwarg2'
         manage(dict(test=test_cmd), argv.split())
+
+    def test_convs_errors(self):
+        def init_cmd():
+            class TestCommand(CommandDigest):
+                @argconv(1, argconv.to_int)
+                @argconv(u'kwarg', argconv.to_date)
+                def command_test(self, arg, kwarg=None, kwarg2=False):
+                    pass
+            return TestCommand
+        self.assertRaises(AssertionError, init_cmd)
 
 
 if __name__ == '__main__':
