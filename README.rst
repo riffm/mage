@@ -18,7 +18,7 @@ or if you defined the command digest:
 Defining commands digest
 ------------------------
 
-Subclass `mage.CommandDigest` class and append methods with prefix `command_`. For example I want to create useful command digest for sqlalchemy:
+Subclass `mage.CommandDigest` class and append methods with prefix `command_`. For example I want to create useful command digest for sqlalchemy::
 
     class SqlaCommands(CommandDigest):
         '''
@@ -50,7 +50,7 @@ Subclass `mage.CommandDigest` class and append methods with prefix `command_`. F
 Note: You can provide your own `__init__`.
 Note: Class docstring and methods docstring becomes help message.
 
-After that just create module with any name, which actualy will be mage :)
+After that just create module with any name, which actualy will be mage :)::
 
     # ./manage.py
     from models import models_list, initial
@@ -63,7 +63,7 @@ After that just create module with any name, which actualy will be mage :)
         ), argv)
 
 Note: You use another delimeter instead of ':', just provide kw argement to `manage` function. `manage(commands, argv, delim='.')`
-Now you are ready to use commands
+Now you are ready to use commands::
 
     % python manage.py sqla:sync
     % python manage.py sqla:sync admin_base
@@ -72,7 +72,7 @@ Now you are ready to use commands
 Defining standalone command
 ---------------------------
 
-If there is no need in command digest you can create standalone command by callable:
+If there is no need in command digest you can create standalone command by callable::
 
     def cmd(arg, kwarg=None, kwarg2=False):
         assert(arg == '1')
@@ -87,7 +87,7 @@ If there is no need in command digest you can create standalone command by calla
             cmd=cmd,
         ), argv)
 
-And after that
+And after that::
 
     % python manage.py cmd arg --kwarg=val --kwarg2
 
@@ -95,7 +95,7 @@ And after that
 On command parametrs
 --------------------
 
-Main purpose was to create flexible commands easy way. So, for parametrs we use native python function parametrs declaration, where you can have args, keyword args with it's defaults values. On command line all arguments after command name will become args. Arguments in form of '--arg=value' will become kwargs. Arguments in form of '--arg' will become kwarg with value 'True' (very useful sometimes). So this call means:
+Main purpose was to create flexible commands easy way. So, for parametrs we use native python function parametrs declaration, where you can have args, keyword args with it's defaults values. On command line all arguments after command name will become args. Arguments in form of '--arg=value' will become kwargs. Arguments in form of '--arg' will become kwarg with value 'True' (very useful sometimes). So this call means::
 
     % python manage.py digest:command_name arg --kwargs=val --kwargs2
 
@@ -105,7 +105,7 @@ Main purpose was to create flexible commands easy way. So, for parametrs we use 
 Arguments converters
 --------------------
 
-`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values:
+`mage` has smart decorator called `argconv`. It helps to convert arguments to python types. First parametr of `argconv` - argument id. For positiional args it is index number, for keyword args it is arg name (str) (note: as you may know - indexing in python starts from zero). All other positional parametrs are - functions that can convert or validate values::
 
     class TestCommand(CommandDigest):
 
@@ -122,7 +122,7 @@ Arguments converters
 mage script
 -----------
 
-If you install `mage` standard way (i.e. distutils, setooptools, pip, distribute) you have script installed in your system's bin directory called `mage`. This script allows to call commands from modules inplace. For example we have package `insanities` (in PYTHON_PATH) with module `cmd` with `mage.CommandDigest` based commands in it and we want to call command `project`:
+If you install `mage` standard way (i.e. distutils, setooptools, pip, distribute) you have script installed in your system's bin directory called `mage`. This script allows to call commands from modules inplace. For example we have package `insanities` (in PYTHON_PATH) with module `cmd` with `mage.CommandDigest` based commands in it and we want to call command `project`::
 
     % mage insanities.cmd:project name_of_project
 
