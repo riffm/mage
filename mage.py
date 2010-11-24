@@ -61,6 +61,10 @@ def manage(commands, argv, delim=':'):
             sys.exit('Command "%s" not found' % digest_name)
         try:
             if command is None:
+                if isinstance(digest, CommandDigest):
+                    sys.stdout.write(digest.description())
+                    sys.exit('ERROR: "%s" is command digest' % digest_name)
+                    return
                 digest(*args, **kwargs)
             else:
                 digest(command, *args, **kwargs)
@@ -215,6 +219,14 @@ class CommandDigestTest(unittest.TestCase):
                     pass
             return TestCommand
         self.assertRaises(AssertionError, init_cmd)
+
+    def test_incorrect_call(self):
+        assrt = self.assertEquals
+        class TestCommand(CommandDigest):
+            def command_test(self, arg, kwarg=None, kwarg2=False):
+                pass
+        argv = 'mage.py test'
+        self.assertRaises(SystemExit, lambda: manage(dict(test=TestCommand()), argv.split()))
 
 
 if __name__ == '__main__':
