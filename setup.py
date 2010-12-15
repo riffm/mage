@@ -5,7 +5,7 @@ from distutils.core import setup
 setup(
     name="mage",
     version="0.3",
-    py_modules=["mage"],
+    packages=["mage"],
     scripts=["mage"],
     author="Tim Perevezentsev",
     author_email="riffm2005@gmail.com",

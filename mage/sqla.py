@@ -160,7 +160,21 @@ class Commands(CommandDigest):
 # COLUMNS
 
 from sqlalchemy import String, Integer, Text, Boolean, Date, DateTime
+from sqlalchemy import Column, Table, ForeignKey
+from sqlalchemy import PrimaryKeyConstraint, UniqueConstraint, \
+                       ForeignKeyConstraint
+from sqlalchemy import asc, desc, func
+from sqlalchemy.orm import object_session, composite
+from sqlalchemy.orm.query import Query, _generative
+from sqlalchemy.orm.util import _class_to_mapper
 from sqlalchemy import orm, types, create_engine
+from sqlalchemy.ext import declarative
+from sqlalchemy.ext.associationproxy import association_proxy
+
+
+def relation(*args, **kwargs):
+    kwargs.setdefault('passive_deletes', 'all')
+    return orm.relation(*args, **kwargs)
 
 
 class StringList(types.TypeDecorator):

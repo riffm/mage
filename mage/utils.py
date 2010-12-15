@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
+from os import path
+
+
 class cached_property(object):
     '''Turns decorated method into caching property (method is called once on
     first access to property).'''
@@ -15,5 +19,3 @@ class cached_property(object):
         result = self.method(inst)
         setattr(inst, self.name, result)
         return result
-
-
