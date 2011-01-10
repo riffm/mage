@@ -5,9 +5,11 @@ import os
 import threading
 import logging
 logger = logging.getLogger(__name__)
+import time
+from itertools import chain
 from os import path
 
-__all__ = ['server']
+__all__ = ['application']
 
 
 from .base import CommandDigest, CommandNotFound
@@ -34,20 +36,23 @@ def flush_fds():
             pass
 
 
-class server(CommandDigest):
+class application(CommandDigest):
     '''
-    Development server:
+    WSGI application wrapper. Includes:
+    - devserver (for local development)
+    - shell
 
-        $ python manage.py server:serve
+        $ python manage.py app:serve
     '''
 
-    format = '[%(name)s::%(levelname)s] %(message)s'
+    format = '%(levelname)s [%(name)s] %(message)s'
 
-    def __init__(self, app):
+    def __init__(self, app, namespace=None):
         self.app = app
+        self.namespace = namespace or {}
 
     def command_serve(self, host='', port='8000', level='debug'):
-        '''python manage.py server:serve [host] [port]'''
+        '''python manage.py app:serve [host] [port]'''
         logging.basicConfig(level=getattr(logging, level.upper()), format=self.format)
         try:
             server_thread = DevServerThread(host, port, self.app)
@@ -69,24 +74,15 @@ class server(CommandDigest):
             server_thread.join()
             sys.exit()
 
-    def command_debug(self, url):
-        '''python manage.py server:debug url'''
-        import pdb
-        from ..web.core import RequestContext, STOP
-        rctx = RequestContext.blank(url)
-        try:
-            result = self.app(rctx)
-            if result is STOP:
-                sys.exit('%r NotFound' % url)
-            else:
-                sys.stdout.write('=============================\n')
-                sys.stdout.write('%r %s\n' % (url, rctx.response.status))
-                sys.stdout.write('=============================\n')
-                sys.stdout.write('Data:\n')
-                for k,v in rctx.data.as_dict().items():
-                    sys.stdout.write('%r : %r\n' % (k, v))
-        except Exception, e:
-            pdb.post_mortem(e)
+    def command_shell(self):
+        '''
+        $ python manage.py app:shell
+
+        provides python interactive shell with user defined namespace
+        '''
+        from code import interact
+        interact('Namespace %r' % self.namespace,
+                 local=self.namespace)
 
 
 class DevServerThread(threading.Thread):
@@ -106,7 +102,7 @@ class DevServerThread(threading.Thread):
         super(DevServerThread, self).__init__()
 
     def run(self):
-        logger.info('Insanities server is running on port %s\n' % self.port)
+        logger.info('Devserver is running on port %s\n' % self.port)
         while self.running:
             self.server.handle_request()
 
@@ -127,8 +123,6 @@ def iter_module_files():
 
 
 def reloader_loop(extra_files=None, interval=1):
-    import time
-    from itertools import chain
     mtimes = {}
     while 1:
         for filename in chain(iter_module_files(), extra_files or ()):

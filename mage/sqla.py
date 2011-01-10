@@ -142,19 +142,6 @@ class Commands(CommandDigest):
         self.command_sync(db)
         self.command_initial(db)
 
-    def command_shell(self, db=None):
-        '''
-        $ python manage.py sqlalchemy:shell [--db=name]
-
-        provides python interactive shell with 'db' as session to database
-        '''
-        if db is None:
-            db = ''
-        from code import interact
-        interact('SqlAlchemy session with is local variable - db',
-                 local={'db': construct_maker(self.databases, 
-                                              models=self.models, 
-                                              engine_params=self.engine_params)()})
 
 
 # COLUMNS
