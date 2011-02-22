@@ -14,7 +14,7 @@ from initial import initial
 def run(app):
     manage(dict(
         # sqlalchemy session
-        sqla=sqla.Commands(cfg.DATABASES, models.ModelBase),
+        db=sqla.Commands(cfg.DATABASES, models.ModelBase),
         # dev-server
         app=application(app.as_wsgi()),
         # FCGI server
