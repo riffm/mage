@@ -1,0 +1,8 @@
+jinja2
+html5lib
+simplejson
+pytils
+webob
+sqlalchemy
+PIL
+git+git://github.com/riffm/python-memcached.git
