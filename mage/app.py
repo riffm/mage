@@ -47,17 +47,22 @@ class application(CommandDigest):
 
     format = '%(levelname)s [%(name)s] %(message)s'
 
-    def __init__(self, app, namespace=None):
+    def __init__(self, app, namespace=None, extra_files=None, bootstrap=None):
         self.app = app
         self.namespace = namespace or {}
+        self.extra_files = extra_files
+        self.bootstrap = bootstrap
 
     def command_serve(self, host='', port='8000', level='debug'):
         '''python manage.py app:serve [host] [port]'''
         logging.basicConfig(level=getattr(logging, level.upper()), format=self.format)
+        if self.bootstrap:
+            logger.info('Bootstraping...')
+            self.bootstrap()
         try:
             server_thread = DevServerThread(host, port, self.app)
             server_thread.start()
-            for filename in reloader_loop():
+            for filename in reloader_loop(extra_files=self.extra_files):
                 server_thread.running = False
                 server_thread.join()
                 logger.info('Changes in file "%s"' % filename)
