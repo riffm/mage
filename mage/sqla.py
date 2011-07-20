@@ -81,7 +81,7 @@ class Commands(CommandDigest):
             md_ref = '.'.join(filter(None, [self.models, ref]))
             metadata = import_string(md_ref, 'metadata')
             engine = create_engine(uri, **self.engine_params)
-            engine.logger.name += '(%s)' % ref
+            engine.logger.logger.name += '(%s)' % ref
             metadata.create_all(engine)
 
     def command_drop(self, db=None):
@@ -96,7 +96,7 @@ class Commands(CommandDigest):
             md_ref = '.'.join(filter(None, [self.models, ref]))
             metadata = import_string(md_ref, 'metadata')
             engine = create_engine(uri, **self.engine_params)
-            engine.logger.name += '(%s)' % ref
+            engine.logger.logger.name += '(%s)' % ref
             metadata.create_all(engine)
             metadata.drop_all(engine, checkfirst=True)
 
