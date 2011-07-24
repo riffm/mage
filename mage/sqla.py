@@ -41,7 +41,8 @@ def construct_maker(databases, models=None, query_cls=Query, engine_params=None,
         md_ref = '.'.join(filter(None, [models, ref]))
         metadata = import_string(md_ref, 'metadata')
         engine = create_engine(uri, **engine_params)
-        engine.logger.name += '(%s)' % ref
+        #TODO: find out why this is broken since sqlalchemy 0.7
+        #engine.logger.logger.name += '(%s)' % ref
         for table in metadata.sorted_tables:
             db_dict[table] = engine
     return orm.sessionmaker(class_=session_class, query_cls=query_cls, binds=db_dict,
@@ -142,6 +143,29 @@ class Commands(CommandDigest):
         self.command_sync(db)
         self.command_initial(db)
 
+    def command_gen(self, *names):
+        '''
+        $ python manage.py sqlalchemy:gen users
+        $ python manage.py sqlalchemy:gen docs:30
+        $ python manage.py sqlalchemy:gen users:20 docs:30
+        '''
+        if not names:
+            raise Exception('Please provide generator names')
+        for name in names:
+            name, count = name, 0
+            if ':' in name:
+                name, count = name.split(':', 1)
+            count = int(count)
+            module_name = 'generators.{0}'.format(name)
+            try:
+                create = import_string(module_name, 'create')
+            except AttributeError:
+                raise Exception('Make sure you have `create` callable in `{0}` module'.format(module_name))
+            session = construct_maker(self.databases, models=self.models,
+                                      engine_params=self.engine_params)()
+            print('Generating `{0}` count={1}'.format(name, count))
+            create(session, count)
+            session.commit()
 
 
 # COLUMNS
