@@ -35,8 +35,9 @@ def construct_maker(databases, models=None, query_cls=Query, engine_params=None,
     engine_params = engine_params or {}
     db_dict = {}
     if isinstance(databases, basestring):
+        engine = create_engine(databases, **engine_params)
         return orm.sessionmaker(class_=session_class, query_cls=query_cls,
-                                autoflush=False)
+                                bind=engine, autoflush=False)
     for ref, uri in databases.items():
         md_ref = '.'.join(filter(None, [models, ref]))
         metadata = import_string(md_ref, 'metadata')
